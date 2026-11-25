@@ -24,13 +24,20 @@ MAX_CHARS = 200
 
 
 def validate(text):
-    """Enforce the RULES.txt gate: UTF-8, 1-200 chars, not only whitespace."""
+    """Enforce the RULES.txt gate: UTF-8, 1-200 chars, not only whitespace.
+
+    Also rejects every C0 control character, not just newlines: the judge
+    reads one line, and a stray tab or bell in the middle of it would
+    corrupt the read just as surely as a line break.
+    """
     if not isinstance(text, str):
         raise ValueError("entry must be text")
     if not text.strip():
         raise ValueError("entry must not be only whitespace")
     if "\n" in text or "\r" in text:
         raise ValueError("entry must be a single line")
+    if any(ord(ch) < 32 for ch in text):
+        raise ValueError("entry must not contain control characters")
     if len(text) > MAX_CHARS:
         raise ValueError("entry is %d chars, over the 200-char limit" % len(text))
     text.encode("utf-8")
